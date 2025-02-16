@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { FaSun, FaMoon, FaUpload } from "react-icons/fa";
 import Logo from "./assets/logoqna.png";
 import { IoMdArrowDroprightCircle } from "react-icons/io";
+import { Bar } from "react-chartjs-2";
+
 
 const API_BASE_URL = "http://localhost:5000";
 
@@ -14,6 +16,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState(null); // Add summary state
+  const [simplified, setSimplified] = useState(null);
 
 const handleSummarize = async () => {
     if (!file) {
@@ -41,6 +44,39 @@ const handleSummarize = async () => {
     } finally {
         setLoading(false);
     }
+};
+
+const handleSimplify = async () => {
+  if (!file) {
+      setError("Please upload a PDF file.");
+      return;
+  }
+
+  const formData = new FormData();
+  formData.append("pdf", file);
+
+  try {
+      setLoading(true);
+      setError("");
+
+      const response = await axios.post(`${API_BASE_URL}/simplify`, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      console.log("🔍 Simplification API Response:", response.data);
+      setSimplified(response.data.simplified);
+
+  } catch (error) {
+      console.error("❌ Error simplifying text:", error);
+      setError("Failed to simplify text. Please try again.");
+  } finally {
+      setLoading(false);
+  }
+};
+
+const chartData = {
+  labels: ["History", "Science", "Business", "Technology"],
+  datasets: [{ label: "Topic Importance", data: [4, 8, 5, 7], backgroundColor: ["blue", "green", "orange", "red"] }]
 };
 
   const handleFileUpload = (e) => {
@@ -81,7 +117,7 @@ const handleSummarize = async () => {
           : "bg-gradient-to-br from-gray-100 via-white to-gray-300 text-black"
       }`}
     >
-      {/* Decorative Background Elements */}
+      
       <div className="absolute inset-0 z-[-1]">
         <div className="absolute top-0 left-0 w-64 h-64 bg-purple-600 opacity-30 rounded-full filter blur-3xl animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 opacity-30 rounded-full filter blur-3xl animate-pulse animation-delay-2000"></div>
@@ -164,7 +200,18 @@ const handleSummarize = async () => {
         {loading ? "Summarizing..." : "Summarize PDF"}
     </motion.button>
 
+    <motion.button
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    onClick={handleSimplify}
+    disabled={loading}
+    className="w-full mt-4 p-3 bg-orange-500 text-white rounded-lg shadow-lg transition-all"
+>
+    {loading ? "Simplifying..." : "Explain To a Kid"}
+</motion.button>
       </motion.div>
+      {/* Input Question By user */}
+      
 
       {/* Display Generated Q&A */}
       {result && (
@@ -203,9 +250,20 @@ const handleSummarize = async () => {
     </motion.div>
 )}
 
+{simplified && (
+    <motion.div
+        className="mt-6 p-6 max-w-lg bg-orange-100 rounded-lg shadow-md"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+    >
+        <h2 className="text-xl font-semibold text-black">Simplified Explanation</h2>
+        <p className="text-black">{simplified}</p>
+    </motion.div>
+)}
 
       <div className="absolute bottom-4 text-gray-400 text-sm">
-        Made with ❤️ by AskVerse
+        Made with ❤️ by Optimal_AC
       </div>
     </div>
   );

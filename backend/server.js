@@ -4,7 +4,7 @@ const { extractTextFromPDF } = require("./utils");
 const { generateQnA } = require("./model");  // ✅ Ensure this is correct
 const cors = require("cors");
 const { summarizeText } = require("./summarizer"); // Import summarization function
-
+const { simplifyText } = require("./simplifier"); 
 
 const app = express();
 const upload = multer({ dest: "uploads/" });
@@ -32,6 +32,21 @@ app.post("/upload", upload.single("pdf"), async (req, res) => {
 
     } catch (error) {
         console.error("❌ Server Error:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/simplify", upload.single("pdf"), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+        const filePath = req.file.path;
+        const text = await extractTextFromPDF(filePath);
+        const simpleText = await simplifyText(text);
+
+        res.json({ simplified: simpleText });
+    } catch (error) {
+        console.error("❌ Simplification Error:", error.message);
         res.status(500).json({ error: error.message });
     }
 });
