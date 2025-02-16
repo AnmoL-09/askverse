@@ -4,18 +4,17 @@ const axios = require("axios");
 // Define the list of questions to generate answers for
 const QUESTIONS = [
     "What is the main idea?",
-    "Summarize the key points.",
-    "What are the most important details?",
-    "Who is mentioned in the document?",
-    "What are the key topics covered?",
-    "What conclusions are drawn?",
-    "What problem is being addressed?",
-    "What is the purpose of this document?",
-    "What are the advantages and disadvantages mentioned?",
-    "What are the main arguments presented?",
-    "How does this document compare to similar ones?"
+    "Summarize the key points in detail.",
+    "What are the most important details? Explain in depth.",
+    "Who is mentioned in the document and what is their significance?",
+    "What are the key topics covered? Provide a detailed explanation.",
+    "What conclusions are drawn? Expand with supporting details.",
+    "What problem is being addressed and how is it solved?",
+    "What is the purpose of this document? Explain with context.",
+    "What are the advantages and disadvantages mentioned? Provide examples.",
+    "What are the main arguments presented? Elaborate with context.",
+    "How does this document compare to similar ones? Provide a thorough analysis."
 ];
-
 
 async function generateQnA(text) {
     try {
@@ -30,6 +29,10 @@ async function generateQnA(text) {
                     inputs: {
                         context: text,
                         question: question
+                    },
+                    parameters: {
+                        max_answer_length: 150, // Increase max length for detailed answers
+                        min_answer_length: 50 // Ensure answers are at least a paragraph long
                     }
                 },
                 {
